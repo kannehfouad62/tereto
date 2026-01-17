@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: tereto_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tereto_user
+      POSTGRES_PASSWORD: TeretoPass123!
+      POSTGRES_DB: tereto
+    ports:
+      - "5432:5432"
+    volumes:
+      - tereto_pg:/var/lib/postgresql/data
+
+volumes:
+  tereto_pg:

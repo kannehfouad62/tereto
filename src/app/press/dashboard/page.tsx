@@ -6,15 +6,21 @@ import { requireEditor } from "@/lib/authz";
 import TrashActions from "@/components/press/TrashActions";
 import SoftDeleteButton from "@/components/press/SoftDeleteButton";
 
+type DashboardSearchParams = {
+  tab?: string;
+};
+
 export default async function PressDashboardPage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  // ✅ Next 15 expects searchParams as a Promise (per your PageProps constraint)
+  searchParams?: Promise<DashboardSearchParams>;
 }) {
   const gate = await requireEditor();
   if (!gate.ok) redirect("/press/login");
 
-  const tab = searchParams.tab === "trash" ? "trash" : "posts";
+  const sp = searchParams ? await searchParams : {};
+  const tab = sp.tab === "trash" ? "trash" : "posts";
 
   const whereBase = gate.role === "CONTRIBUTOR" ? { authorId: gate.uid } : {};
   const where =
@@ -78,7 +84,9 @@ export default async function PressDashboardPage({
 
         {posts.length === 0 ? (
           <div className="px-4 py-10 text-center text-sm text-black/60">
-            {tab === "trash" ? "Trash is empty." : "No posts yet. Click New Post to create one."}
+            {tab === "trash"
+              ? "Trash is empty."
+              : "No posts yet. Click New Post to create one."}
           </div>
         ) : (
           posts.map((p) => (
@@ -88,7 +96,9 @@ export default async function PressDashboardPage({
             >
               <div className="col-span-6 font-medium">{p.title}</div>
               <div className="col-span-2">{p.status}</div>
-              <div className="col-span-2">{new Date(p.updatedAt).toLocaleDateString()}</div>
+              <div className="col-span-2">
+                {new Date(p.updatedAt).toLocaleDateString()}
+              </div>
 
               <div className="col-span-2 flex justify-end gap-2">
                 {tab === "posts" ? (
